@@ -52,6 +52,7 @@ export class SupermemoryClient {
         ),
         TIMEOUT_MS
       );
+      log("searchMemories: result", { result });
       log("searchMemories: success", { count: (result as any).results?.length || 0 });
       return result;
     } catch (error) {
@@ -68,6 +69,7 @@ export class SupermemoryClient {
         this.getClient().getProfile(containerTag, query),
         TIMEOUT_MS
       );
+      log("getProfile: result", { result });
       log("getProfile: success", { hasProfile: !!(result as any).profile });
       return result;
     } catch (error) {
