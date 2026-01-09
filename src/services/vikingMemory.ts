@@ -195,14 +195,15 @@ export class VikingMemory {
       };
     }
   }
-
+  
   async deleteMemory(memoryId: string): Promise<{ success: true } | { success: false; error: string }> {
     try {
       const response = await fetch(`${this.url}/api/memory/event/delete`, {
-        method: "DELETE",
+        method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${this.apiKey}`,
+          "X-Viking-Debug": "1",
         },
       });
 
@@ -235,17 +236,18 @@ export class VikingMemory {
     pagination: { currentPage: 1; totalItems: 0; totalPages: 0 };
   }> {
     try {
-      const response = await fetch(`${this.url}/memories/list`, {
+      const response = await fetch(`${this.url}/api/memory/event/search`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${this.apiKey}`,
+          "X-Viking-Debug": "1",
         },
         body: JSON.stringify({
           containerTags: [containerTag],
-          limit,
-          order: options?.order || "desc",
-          sort: options?.sort || "createdAt",
+          filter: {user_id: containerTag, memory_type: "event_v1"},
+          limit: 5000, // mock 
+          resource_id: this.resource_id
         }),
       });
 
@@ -255,9 +257,38 @@ export class VikingMemory {
         log("listMemories: error", { error: errorMessage });
         return { success: false, error: errorMessage, memories: [], pagination: { currentPage: 1, totalItems: 0, totalPages: 0 } };
       }
+      
+      interface NewApiResponse {
+        data: {
+          count: number;
+          result_list: Array<{
+            id: string;
+            time: number;
+            memory_info: Record<string, any>; 
+          }>;
+        };
+      }
 
-      const result = await response.json() as Record<string, unknown>;
-      return { success: true, memories: (result.memories as Array<{ id: string; summary: string; createdAt: string; metadata?: Record<string, unknown> }>) || [], pagination: (result.pagination as { currentPage: number; totalItems: number; totalPages: number }) || { currentPage: 1, totalItems: 0, totalPages: 0 } };
+      const result = await response.json() as NewApiResponse;
+      log("listMemories: response", { result: result });
+      const mappedResults = (result.data?.result_list || []).map((item) => {
+        const content = JSON.stringify(item.memory_info || {});
+        const createdAt = item.time ? (typeof item.time === "number" ? new Date(item.time).toISOString() : String(item.time)) : "";
+        return {
+          id: item.id,
+          summary: content,       // 对应 memory_info
+          createdAt,       
+        };
+      });
+
+      const totalItems = (result.data && typeof result.data.count === "number") ? result.data.count : mappedResults.length;
+      const totalPages = Math.max(1, Math.ceil(totalItems / limit));
+
+      return {
+        success: true,
+        memories: mappedResults,
+        pagination: { currentPage: 1, totalItems, totalPages }
+      };
     } catch (error) {
       return {
         success: false,
@@ -283,18 +314,18 @@ export class VikingMemory {
     error: string;
   }> {
     try {
-      const response = await fetch(`${this.url}/conversations`, {
+        const requestBody = {
+        "messages": messages,
+        resource_id: this.resource_id,
+        "metadata": {"default_user_id": containerTags, "default_assistant_id": "opencode", "time": Date.now(), "session_id": conversationId}
+      };
+      const response = await fetch(`${this.url}/api/memory/session/add`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
           "Authorization": `Bearer ${this.apiKey}`,
         },
-        body: JSON.stringify({
-          conversationId,
-          messages,
-          containerTags,
-          metadata,
-        }),
+        body: JSON.stringify(requestBody),
       });
 
       if (!response.ok) {
@@ -305,7 +336,10 @@ export class VikingMemory {
       }
 
       const result = await response.json() as Record<string, unknown>;
-      return { success: true, id: (result.id as string) || "", conversationId: (result.conversationId as string) || conversationId, status: (result.status as string) || "" };
+      const dataObj = result.data as { session_id: string };
+      log("ingestConversation: response", { status: response.status, result });
+
+      return { success: true, id: (dataObj.session_id as string) || "", conversationId: (result.conversationId as string) || conversationId, status: (result.status as string) || "" };
     } catch (error) {
       return {
         success: false,
