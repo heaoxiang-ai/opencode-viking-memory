@@ -1,5 +1,5 @@
-import Supermemory from "supermemory";
-import { CONFIG, SUPERMEMORY_API_KEY, isConfigured } from "../config.js";
+import { VikingMemory } from "./vikingMemory.js";
+import { CONFIG, VIKING_MEMORY_API_KEY, isConfigured, RESOURCE_ID} from "../config.js";
 import { log } from "./logger.js";
 import type {
   MemoryType,
@@ -7,7 +7,7 @@ import type {
   ConversationIngestResponse,
 } from "../types/index.js";
 
-const SUPERMEMORY_API_URL = "https://api.supermemory.ai";
+const Viking_Memory_API_URL = "https://api-knowledgebase.mlp.cn-beijing.volces.com";
 
 const TIMEOUT_MS = 30000;
 
@@ -21,18 +21,18 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
 }
 
 export class SupermemoryClient {
-  private client: Supermemory | null = null;
+  private client: VikingMemory | null = null;
 
-  private getClient(): Supermemory {
+  private getClient(): VikingMemory {
     if (!this.client) {
       if (!isConfigured()) {
-        throw new Error("SUPERMEMORY_API_KEY not set");
+        throw new Error("VIKING_MEMORY_API_KEY not set");
       }
-      this.client = new Supermemory({ apiKey: SUPERMEMORY_API_KEY });
-      this.client.settings.update({
-	     	shouldLLMFilter: true,
-	      filterPrompt: CONFIG.filterPrompt
-      })
+      this.client = new VikingMemory({
+        apiKey: VIKING_MEMORY_API_KEY!,
+        url: Viking_Memory_API_URL,
+        resource_id: RESOURCE_ID,
+      });
     }
     return this.client;
   }
@@ -41,17 +41,19 @@ export class SupermemoryClient {
     log("searchMemories: start", { containerTag });
     try {
       const result = await withTimeout(
-        this.getClient().search.memories({
-          q: query,
+        this.getClient().searchMemories(
+          query,
           containerTag,
-          threshold: CONFIG.similarityThreshold,
-          limit: CONFIG.maxMemories,
-          searchMode: "hybrid"
-        }),
+          {
+            threshold: CONFIG.similarityThreshold,
+            limit: CONFIG.maxMemories,
+            searchMode: "hybrid"
+          }
+        ),
         TIMEOUT_MS
       );
-      log("searchMemories: success", { count: result.results?.length || 0 });
-      return { success: true as const, ...result };
+      log("searchMemories: success", { count: (result as any).results?.length || 0 });
+      return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       log("searchMemories: error", { error: errorMessage });
@@ -63,14 +65,11 @@ export class SupermemoryClient {
     log("getProfile: start", { containerTag });
     try {
       const result = await withTimeout(
-        this.getClient().profile({
-          containerTag,
-          q: query,
-        }),
+        this.getClient().getProfile(containerTag, query),
         TIMEOUT_MS
       );
-      log("getProfile: success", { hasProfile: !!result?.profile });
-      return { success: true as const, ...result };
+      log("getProfile: success", { hasProfile: !!(result as any).profile });
+      return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       log("getProfile: error", { error: errorMessage });
@@ -86,15 +85,20 @@ export class SupermemoryClient {
     log("addMemory: start", { containerTag, contentLength: content.length });
     try {
       const result = await withTimeout(
-        this.getClient().memories.add({
+        this.getClient().addMemory(
           content,
           containerTag,
-          metadata: metadata as Record<string, string | number | boolean | string[]>,
-        }),
+          metadata as Record<string, string | number | boolean | string[]>,
+        ),
         TIMEOUT_MS
       );
-      log("addMemory: success", { id: result.id });
-      return { success: true as const, ...result };
+      log("addMemory: result", { result });
+      if (!result.success) {
+        log("addMemory: error", { error: result.error });
+        return result;
+      }
+      log("addMemory: success", { id: (result as any).id });
+      return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       log("addMemory: error", { error: errorMessage });
@@ -106,7 +110,7 @@ export class SupermemoryClient {
     log("deleteMemory: start", { memoryId });
     try {
       await withTimeout(
-        this.getClient().memories.delete(memoryId),
+        this.getClient().deleteMemory(memoryId),
         TIMEOUT_MS
       );
       log("deleteMemory: success", { memoryId });
@@ -122,16 +126,15 @@ export class SupermemoryClient {
     log("listMemories: start", { containerTag, limit });
     try {
       const result = await withTimeout(
-        this.getClient().memories.list({
-          containerTags: [containerTag],
+        this.getClient().listMemories(
+          containerTag,
           limit,
-          order: "desc",
-          sort: "createdAt",
-        }),
+          { order: "desc", sort: "createdAt" }
+        ),
         TIMEOUT_MS
       );
-      log("listMemories: success", { count: result.memories?.length || 0 });
-      return { success: true as const, ...result };
+      log("listMemories: success", { count: (result as any).memories?.length || 0 });
+      return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       log("listMemories: error", { error: errorMessage });
@@ -148,11 +151,11 @@ export class SupermemoryClient {
     log("ingestConversation: start", { conversationId, messageCount: messages.length });
     try {
       const response = await withTimeout(
-        fetch(`${SUPERMEMORY_API_URL}/conversations`, {
+        fetch(`${Viking_Memory_API_URL}/conversations`, {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
-            Authorization: `Bearer ${SUPERMEMORY_API_KEY}`,
+            Authorization: `Bearer ${VIKING_MEMORY_API_KEY}`,
           },
           body: JSON.stringify({
             conversationId,

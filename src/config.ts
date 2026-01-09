@@ -78,6 +78,8 @@ function loadConfig(): SupermemoryConfig {
 const fileConfig = loadConfig();
 
 export const SUPERMEMORY_API_KEY = fileConfig.apiKey ?? process.env.SUPERMEMORY_API_KEY;
+export const VIKING_MEMORY_API_KEY = fileConfig.apiKey ?? process.env.SUPERMEMORY_API_KEY;
+export const RESOURCE_ID = "mem-70bd335a"
 
 export const CONFIG = {
   similarityThreshold: fileConfig.similarityThreshold ?? DEFAULTS.similarityThreshold,

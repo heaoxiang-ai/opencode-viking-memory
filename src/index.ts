@@ -41,7 +41,8 @@ export const SupermemoryPlugin: Plugin = async (ctx: PluginInput) => {
   const tags = getTags(directory);
   const injectedSessions = new Set<string>();
   log("Plugin init", { directory, tags, configured: isConfigured() });
-
+  log("测试viking memory")
+  
   if (!isConfigured()) {
     log("Plugin disabled - SUPERMEMORY_API_KEY not set");
   }
