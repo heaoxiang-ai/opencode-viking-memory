@@ -31,7 +31,7 @@ export class VikingMemoryClient {
       this.client = new VikingMemory({
         apiKey: VIKING_MEMORY_API_KEY!,
         url: Viking_Memory_API_URL,
-        resource_id: VIKING_MEMORY_RESOURCE_ID,
+        resource_id: VIKING_MEMORY_RESOURCE_ID!,
       });
     }
     return this.client;

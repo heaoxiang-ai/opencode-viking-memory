@@ -1,4 +1,9 @@
-import type { ProfileResponse } from "@volcengine/viking-memory/resources";
+interface ProfileResponse {
+  profile?: {
+    static: string[];
+    dynamic: string[];
+  };
+}
 import { CONFIG } from "../config.js";
 
 interface MemoryResultMinimal {

@@ -28,8 +28,7 @@
     "url": "https://github.com/volcengine/opencode-viking-memory"
   },
   "dependencies": {
-    "@opencode-ai/plugin": "^1.0.162",
-    "@volcengine/viking-memory": "^1.0.0"
+    "@opencode-ai/plugin": "^1.0.162"
   },
   "devDependencies": {
     "@types/bun": "latest",
