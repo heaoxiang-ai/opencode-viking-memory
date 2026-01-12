@@ -38,7 +38,7 @@ export class VikingMemory {
         },
         body: JSON.stringify({
           query: query,
-          filter: {user_id: containerTag, memory_type: "event_v1"},
+          filter: {user_id: containerTag, memory_type: "sys_event_vibe_coding_v1"},
           limit: options?.limit,
           resource_id: this.resource_id
         }),
@@ -107,7 +107,7 @@ export class VikingMemory {
           "X-Viking-Debug": "1",
         },
         body: JSON.stringify({
-          "filter": {"user_id": containerTag, "memory_type": "profile_v1"},
+          "filter": {"user_id": containerTag, "memory_type": "sys_profile_vibe_coding_v1"},
           "query": query,
           "resource_id": this.resource_id,
         }),
@@ -245,7 +245,7 @@ export class VikingMemory {
         },
         body: JSON.stringify({
           containerTags: [containerTag],
-          filter: {user_id: containerTag, memory_type: "event_v1"},
+          filter: {user_id: containerTag, memory_type: "sys_event_vibe_coding_v1"},
           limit: 5000, // mock 
           resource_id: this.resource_id
         }),
