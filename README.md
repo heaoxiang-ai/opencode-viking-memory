@@ -25,7 +25,7 @@ export VIKING_MEMORY_RESOURCE_ID="mem-..."
 
 **Or let your agent do it** - paste this into OpenCode:
 ```
-Install opencode-viking-memory by following https://raw.githubusercontent.com/volcengine/opencode-viking-memory/main/README.md
+Install opencode-viking-memory by following https://raw.githubusercontent.com/heaoxiang-ai/opencode-viking-memory/main/README.md
 ```
 
 ### For LLM Agents
