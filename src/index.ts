@@ -2,7 +2,7 @@ import type { Plugin, PluginInput } from "@opencode-ai/plugin";
 import type { Part } from "@opencode-ai/sdk";
 import { tool } from "@opencode-ai/plugin";
 
-import { supermemoryClient } from "./services/client.js";
+import { vikingMemoryClient } from "./services/client.js";
 import { formatContextForPrompt } from "./services/context.js";
 import { getTags } from "./services/tags.js";
 import { stripPrivateContent, isFullyPrivate } from "./services/privacy.js";
@@ -18,7 +18,7 @@ const INLINE_CODE_PATTERN = /`[^`]+`/g;
 const MEMORY_KEYWORD_PATTERN = new RegExp(`\\b(${CONFIG.keywordPatterns.join("|")})\\b`, "i");
 
 const MEMORY_NUDGE_MESSAGE = `[MEMORY TRIGGER DETECTED]
-The user wants you to remember something. You MUST use the \`supermemory\` tool with \`mode: "add"\` to save this information.
+The user wants you to remember something. You MUST use the \`vikingMemory\` tool with \`mode: "add"\` to save this information.
 
 Extract the key information the user wants remembered and save it as a concise, searchable memory.
 - Use \`scope: "project"\` for project-specific preferences (e.g., "run lint with tests")
@@ -36,7 +36,7 @@ function detectMemoryKeyword(text: string): boolean {
   return MEMORY_KEYWORD_PATTERN.test(textWithoutCode);
 }
 
-export const SupermemoryPlugin: Plugin = async (ctx: PluginInput) => {
+export const VikingMemoryPlugin: Plugin = async (ctx: PluginInput) => {
   const { directory } = ctx;
   const tags = getTags(directory);
   const injectedSessions = new Set<string>();
@@ -44,7 +44,7 @@ export const SupermemoryPlugin: Plugin = async (ctx: PluginInput) => {
   log("测试viking memory")
   
   if (!isConfigured()) {
-    log("Plugin disabled - SUPERMEMORY_API_KEY not set");
+    log("Plugin disabled - VIKING_MEMORY_API_KEY not set");
   }
 
   const compactionHook = isConfigured() && ctx.client
@@ -83,7 +83,7 @@ export const SupermemoryPlugin: Plugin = async (ctx: PluginInput) => {
         if (detectMemoryKeyword(userMessage)) {
           log("chat.message: memory keyword detected");
           const nudgePart: Part = {
-            id: `supermemory-nudge-${Date.now()}`,
+             id: `viking_memory-nudge-${Date.now()}`,
             sessionID: input.sessionID,
             messageID: output.message.id,
             type: "text",
@@ -99,9 +99,9 @@ export const SupermemoryPlugin: Plugin = async (ctx: PluginInput) => {
           injectedSessions.add(input.sessionID);
 
           const [profileResult, userMemoriesResult, projectMemoriesListResult] = await Promise.all([
-            supermemoryClient.getProfile(tags.user, userMessage),
-            supermemoryClient.searchMemories(userMessage, tags.user),
-            supermemoryClient.listMemories(tags.project, CONFIG.maxProjectMemories),
+            vikingMemoryClient.getProfile(tags.user, userMessage),
+            vikingMemoryClient.searchMemories(userMessage, tags.user),
+            vikingMemoryClient.listMemories(tags.project, CONFIG.maxProjectMemories),
           ]);
 
           const profile = profileResult.success ? profileResult : null;
@@ -128,7 +128,7 @@ export const SupermemoryPlugin: Plugin = async (ctx: PluginInput) => {
 
           if (memoryContext) {
             const contextPart: Part = {
-              id: `supermemory-context-${Date.now()}`,
+              id: `viking_memory-context-${Date.now()}`,
               sessionID: input.sessionID,
               messageID: output.message.id,
               type: "text",
@@ -152,9 +152,9 @@ export const SupermemoryPlugin: Plugin = async (ctx: PluginInput) => {
     },
 
     tool: {
-      supermemory: tool({
+      viking_memory: tool({
         description:
-          "Manage and query the Supermemory persistent memory system. Use 'search' to find relevant memories, 'add' to store new knowledge, 'profile' to view user profile, 'list' to see recent memories, 'forget' to remove a memory.",
+          "Manage and query the VikingMemory persistent memory system. Use 'search' to find relevant memories, 'add' to store new knowledge, 'profile' to view user profile, 'list' to see recent memories, 'forget' to remove a memory.",
         args: {
           mode: tool.schema
             .enum(["add", "search", "profile", "list", "forget", "help"])
@@ -188,7 +188,7 @@ export const SupermemoryPlugin: Plugin = async (ctx: PluginInput) => {
             return JSON.stringify({
               success: false,
               error:
-                "SUPERMEMORY_API_KEY not set. Set it in your environment to use Supermemory.",
+                "VIKING_MEMORY_API_KEY not set. Set it in your environment to use VikingMemory.",
             });
           }
 
@@ -262,7 +262,7 @@ export const SupermemoryPlugin: Plugin = async (ctx: PluginInput) => {
                 const containerTag =
                   scope === "user" ? tags.user : tags.project;
 
-                const result = await supermemoryClient.addMemory(
+                const result = await vikingMemoryClient.addMemory(
                   sanitizedContent,
                   containerTag,
                   { type: args.type }
@@ -295,7 +295,7 @@ export const SupermemoryPlugin: Plugin = async (ctx: PluginInput) => {
                 const scope = args.scope;
 
                 if (scope === "user") {
-                  const result = await supermemoryClient.searchMemories(
+                  const result = await vikingMemoryClient.searchMemories(
                     args.query,
                     tags.user
                   );
@@ -309,7 +309,7 @@ export const SupermemoryPlugin: Plugin = async (ctx: PluginInput) => {
                 }
 
                 if (scope === "project") {
-                  const result = await supermemoryClient.searchMemories(
+                  const result = await vikingMemoryClient.searchMemories(
                     args.query,
                     tags.project
                   );
@@ -323,8 +323,8 @@ export const SupermemoryPlugin: Plugin = async (ctx: PluginInput) => {
                 }
 
                 const [userResult, projectResult] = await Promise.all([
-                  supermemoryClient.searchMemories(args.query, tags.user),
-                  supermemoryClient.searchMemories(args.query, tags.project),
+                  vikingMemoryClient.searchMemories(args.query, tags.user),
+                  vikingMemoryClient.searchMemories(args.query, tags.project),
                 ]);
 
                 if (!userResult.success || !projectResult.success) {
@@ -359,7 +359,7 @@ export const SupermemoryPlugin: Plugin = async (ctx: PluginInput) => {
               }
 
               case "profile": {
-                const result = await supermemoryClient.getProfile(
+                const result = await vikingMemoryClient.getProfile(
                   tags.user,
                   args.query
                 );
@@ -386,7 +386,7 @@ export const SupermemoryPlugin: Plugin = async (ctx: PluginInput) => {
                 const containerTag =
                   scope === "user" ? tags.user : tags.project;
 
-                const result = await supermemoryClient.listMemories(
+                const result = await vikingMemoryClient.listMemories(
                   containerTag,
                   limit
                 );
@@ -422,7 +422,7 @@ export const SupermemoryPlugin: Plugin = async (ctx: PluginInput) => {
 
                 const scope = args.scope || "project";
 
-                const result = await supermemoryClient.deleteMemory(
+                const result = await vikingMemoryClient.deleteMemory(
                   args.memoryId
                 );
 

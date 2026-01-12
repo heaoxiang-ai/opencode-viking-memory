@@ -1,5 +1,5 @@
 import { VikingMemory } from "./vikingMemory.js";
-import { CONFIG, VIKING_MEMORY_API_KEY, isConfigured, RESOURCE_ID} from "../config.js";
+import { CONFIG, VIKING_MEMORY_API_KEY, isConfigured, VIKING_MEMORY_RESOURCE_ID} from "../config.js";
 import { log } from "./logger.js";
 import type {
   MemoryType,
@@ -20,7 +20,7 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   ]);
 }
 
-export class SupermemoryClient {
+export class VikingMemoryClient {
   private client: VikingMemory | null = null;
 
   private getClient(): VikingMemory {
@@ -31,7 +31,7 @@ export class SupermemoryClient {
       this.client = new VikingMemory({
         apiKey: VIKING_MEMORY_API_KEY!,
         url: Viking_Memory_API_URL,
-        resource_id: RESOURCE_ID,
+        resource_id: VIKING_MEMORY_RESOURCE_ID,
       });
     }
     return this.client;
@@ -186,4 +186,4 @@ export class SupermemoryClient {
   }
 }
 
-export const supermemoryClient = new SupermemoryClient();
+export const vikingMemoryClient = new VikingMemoryClient();

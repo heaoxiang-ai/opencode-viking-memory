@@ -1,4 +1,4 @@
-import type { ProfileResponse } from "supermemory/resources";
+import type { ProfileResponse } from "@volcengine/viking-memory/resources";
 import { CONFIG } from "../config.js";
 
 interface MemoryResultMinimal {
@@ -16,7 +16,7 @@ export function formatContextForPrompt(
   userMemories: MemoriesResponseMinimal,
   projectMemories: MemoriesResponseMinimal
 ): string {
-  const parts: string[] = ["[SUPERMEMORY]"];
+  const parts: string[] = ["[VIKING_MEMORY]"];
 
   if (CONFIG.injectProfile && profile?.profile) {
     const { static: staticFacts, dynamic: dynamicFacts } = profile.profile;

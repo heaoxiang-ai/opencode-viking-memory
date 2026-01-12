@@ -1,26 +1,31 @@
-# opencode-supermemory
+# opencode-viking-memory
 
-OpenCode plugin for persistent memory using [Supermemory](https://supermemory.ai).
+OpenCode plugin for persistent memory using [VikingMemory](https://console.volcengine.com/knowledgebase/).
 
 Your agent remembers what you tell it - across sessions, across projects.
+
+## Credits
+
+This project references and is based on the [opencode-supermemory](https://github.com/supermemoryai/opencode-supermemory) project.
 
 ## Installation
 
 ### For Humans
 
 ```bash
-bunx opencode-supermemory@latest install
+bunx opencode-viking-memory@latest install
 ```
 
-Then get your API key from [console.supermemory.ai](https://console.supermemory.ai) and set it:
+Then get your API key and Resource ID from [火山引擎 Viking 记忆控制台](https://console.volcengine.com/knowledgebase/) and set them:
 
 ```bash
-export SUPERMEMORY_API_KEY="sm_..."
+export VIKING_MEMORY_API_KEY="..."
+export VIKING_MEMORY_RESOURCE_ID="mem-..."
 ```
 
 **Or let your agent do it** - paste this into OpenCode:
 ```
-Install opencode-supermemory by following https://raw.githubusercontent.com/supermemoryai/opencode-supermemory/main/README.md
+Install opencode-viking-memory by following https://raw.githubusercontent.com/volcengine/opencode-viking-memory/main/README.md
 ```
 
 ### For LLM Agents
@@ -28,17 +33,17 @@ Install opencode-supermemory by following https://raw.githubusercontent.com/supe
 <details>
 <summary>Instructions for LLM Agents (click to expand)</summary>
 
-If you're an LLM agent helping set up opencode-supermemory, follow these steps:
+If you're an LLM agent helping set up opencode-viking-memory, follow these steps:
 
 #### Step 1: Run the installer
 
 ```bash
-bunx opencode-supermemory@latest install --no-tui
+bunx opencode-viking-memory@latest install --no-tui
 ```
 
 This will:
 - Register the plugin in `~/.config/opencode/opencode.jsonc`
-- Create the `/supermemory-init` command
+- Create the `/viking-memory-init` command
 
 #### Step 2: Verify the config
 
@@ -49,7 +54,7 @@ cat ~/.config/opencode/opencode.jsonc
 Should contain:
 ```json
 {
-  "plugin": ["opencode-supermemory"]
+  "plugin": ["opencode-viking-memory"]
 }
 ```
 
@@ -59,7 +64,7 @@ If not, add it manually:
 ```jsonc
 {
   "plugin": [
-    "opencode-supermemory"
+    "opencode-viking-memory"
     // ... other plugins
   ]
 }
@@ -68,25 +73,27 @@ If not, add it manually:
 **JSON:**
 ```json
 {
-  "plugin": ["opencode-supermemory"]
+  "plugin": ["opencode-viking-memory"]
 }
 ```
 
 #### Step 3: Configure API key
 
-Ask the user to get their API key from [console.supermemory.ai](https://console.supermemory.ai).
+Ask the user to get their API key from [火山引擎 Viking 记忆控制台](https://console.volcengine.com/knowledgebase/).
 
-Then set it via environment variable:
+Then set them via environment variables:
 
 ```bash
-export SUPERMEMORY_API_KEY="sm_..."
+export VIKING_MEMORY_API_KEY="..."
+export VIKING_MEMORY_RESOURCE_ID="mem-..."
 ```
 
-Or create `~/.config/opencode/supermemory.jsonc`:
+Or create `~/.config/opencode/viking_memory.jsonc`:
 
 ```jsonc
 {
-  "apiKey": "sm_..."
+  "apiKey": "...",
+  "resourceId": "mem-..."
 }
 ```
 
@@ -98,14 +105,14 @@ Tell the user to restart OpenCode and run:
 opencode -c
 ```
 
-They should see `supermemory` in the tools list. If not, check:
-1. Is `SUPERMEMORY_API_KEY` set?
+They should see `viking_memory` in the tools list. If not, check:
+1. Is `VIKING_MEMORY_API_KEY` set?
 2. Is the plugin in `opencode.jsonc`?
-3. Check logs: `tail ~/.opencode-supermemory.log`
+3. Check logs: `tail ~/.opencode-viking-memory.log`
 
 #### Step 5: Initialize codebase memory (optional)
 
-Run `/supermemory-init` to have the agent explore and memorize the codebase.
+Run `/viking-memory-init` to have the agent explore and memorize the codebase.
 
 </details>
 
@@ -120,7 +127,7 @@ On first message, the agent receives (invisible to user):
 
 Example of what the agent sees:
 ```
-[SUPERMEMORY]
+[VIKING_MEMORY]
 
 User Profile:
 - Prefers concise responses
@@ -149,7 +156,7 @@ Add custom triggers via `keywordPatterns` config.
 
 ### Codebase Indexing
 
-Run `/supermemory-init` to explore and memorize your codebase structure, patterns, and conventions.
+Run `/viking-memory-init` to explore and memorize your codebase structure, patterns, and conventions.
 
 ### Preemptive Compaction
 
@@ -170,7 +177,7 @@ Content in `<private>` tags is never stored.
 
 ## Tool Usage
 
-The `supermemory` tool is available to the agent:
+The `viking_memory` tool is available to the agent:
 
 | Mode | Args | Description |
 |------|------|-------------|
@@ -193,12 +200,15 @@ The `supermemory` tool is available to the agent:
 
 ## Configuration
 
-Create `~/.config/opencode/supermemory.jsonc`:
+Create `~/.config/opencode/viking_memory.jsonc`:
 
 ```jsonc
 {
-  // API key (can also use SUPERMEMORY_API_KEY env var)
-  "apiKey": "sm_...",
+  // API key (can also use VIKING_MEMORY_API_KEY env var)
+  "apiKey": "...",
+  
+  // Resource ID (can also use VIKING_MEMORY_RESOURCE_ID env var)
+  "resourceId": "mem-...",
   
   // Min similarity for memory retrieval (0-1)
   "similarityThreshold": 0.6,
@@ -223,11 +233,11 @@ Create `~/.config/opencode/supermemory.jsonc`:
 }
 ```
 
-All fields optional. Env var `SUPERMEMORY_API_KEY` takes precedence over config file.
+All fields optional. Env vars `VIKING_MEMORY_API_KEY` and `VIKING_MEMORY_RESOURCE_ID` take precedence over config file.
 
 ## Usage with Oh My OpenCode
 
-If you're using [Oh My OpenCode](https://github.com/code-yeongyu/oh-my-opencode), disable its built-in auto-compact hook to let supermemory handle context compaction:
+If you're using [Oh My OpenCode](https://github.com/code-yeongyu/oh-my-opencode), disable its built-in auto-compact hook to let VikingMemory handle context compaction:
 
 Add to `~/.config/opencode/oh-my-opencode.json`:
 
@@ -249,15 +259,19 @@ Local install:
 
 ```jsonc
 {
-  "plugin": ["file:///path/to/opencode-supermemory"]
+  "plugin": ["file:///path/to/opencode-viking-memory"]
 }
 ```
 
 ## Logs
 
 ```bash
-tail -f ~/.opencode-supermemory.log
+tail -f ~/.opencode-viking-memory.log
 ```
+
+## Credits
+
+This project references and is based on the [opencode-supermemory](https://github.com/supermemoryai/opencode-supermemory) project.
 
 ## License
 

@@ -5,12 +5,13 @@ import { stripJsoncComments } from "./services/jsonc.js";
 
 const CONFIG_DIR = join(homedir(), ".config", "opencode");
 const CONFIG_FILES = [
-  join(CONFIG_DIR, "supermemory.jsonc"),
-  join(CONFIG_DIR, "supermemory.json"),
+  join(CONFIG_DIR, "viking_memory.jsonc"),
+  join(CONFIG_DIR, "viking_memory.json"),
 ];
 
-interface SupermemoryConfig {
+interface VikingMemoryConfig {
   apiKey?: string;
+  resourceId?: string;
   similarityThreshold?: number;
   maxMemories?: number;
   maxProjectMemories?: number;
@@ -40,7 +41,7 @@ const DEFAULT_KEYWORD_PATTERNS = [
   "always\\s+remember",
 ];
 
-const DEFAULTS: Required<Omit<SupermemoryConfig, "apiKey">> = {
+const DEFAULTS: Required<Omit<VikingMemoryConfig, "apiKey" | "resourceId">> = {
   similarityThreshold: 0.6,
   maxMemories: 5,
   maxProjectMemories: 10,
@@ -60,13 +61,13 @@ function isValidRegex(pattern: string): boolean {
   }
 }
 
-function loadConfig(): SupermemoryConfig {
+function loadConfig(): VikingMemoryConfig {
   for (const path of CONFIG_FILES) {
     if (existsSync(path)) {
       try {
         const content = readFileSync(path, "utf-8");
         const json = stripJsoncComments(content);
-        return JSON.parse(json) as SupermemoryConfig;
+        return JSON.parse(json) as VikingMemoryConfig;
       } catch {
         // Invalid config, use defaults
       }
@@ -77,9 +78,8 @@ function loadConfig(): SupermemoryConfig {
 
 const fileConfig = loadConfig();
 
-export const SUPERMEMORY_API_KEY = fileConfig.apiKey ?? process.env.SUPERMEMORY_API_KEY;
-export const VIKING_MEMORY_API_KEY = fileConfig.apiKey ?? process.env.SUPERMEMORY_API_KEY;
-export const RESOURCE_ID = "mem-70bd335a"
+export const VIKING_MEMORY_API_KEY = fileConfig.apiKey ?? process.env.VIKING_MEMORY_API_KEY;
+export const VIKING_MEMORY_RESOURCE_ID = fileConfig.resourceId ?? process.env.VIKING_MEMORY_RESOURCE_ID 
 
 export const CONFIG = {
   similarityThreshold: fileConfig.similarityThreshold ?? DEFAULTS.similarityThreshold,
@@ -96,5 +96,5 @@ export const CONFIG = {
 };
 
 export function isConfigured(): boolean {
-  return !!SUPERMEMORY_API_KEY;
+  return !!VIKING_MEMORY_API_KEY;
 }

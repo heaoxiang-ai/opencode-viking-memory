@@ -8,13 +8,13 @@ import { stripJsoncComments } from "./services/jsonc.js";
 const OPENCODE_CONFIG_DIR = join(homedir(), ".config", "opencode");
 const OPENCODE_COMMAND_DIR = join(OPENCODE_CONFIG_DIR, "command");
 const OH_MY_OPENCODE_CONFIG = join(OPENCODE_CONFIG_DIR, "oh-my-opencode.json");
-const PLUGIN_NAME = "opencode-supermemory@latest";
+const PLUGIN_NAME = "opencode-viking-memory@latest";
 
 const SUPERMEMORY_INIT_COMMAND = `---
 description: Initialize Supermemory with comprehensive codebase knowledge
 ---
 
-# Initializing Supermemory
+# Initializing VikingMemory
 
 You are initializing persistent memory for this codebase. This is not just data collection - you're building context that will make you significantly more effective across all future sessions.
 
@@ -111,10 +111,10 @@ Good (thorough):
 
 ## Saving Memories
 
-Use the \`supermemory\` tool for each distinct insight:
+Use the \`viking_memory\` tool for each distinct insight:
 
 \`\`\`
-supermemory(mode: "add", content: "...", type: "...", scope: "project")
+viking_memory(mode: "add", content: "...", type: "...", scope: "project")
 \`\`\`
 
 **Types:**
@@ -155,7 +155,7 @@ Then ask: "I've initialized memory with X insights. Want me to continue refining
 ## Your Task
 
 1. Ask upfront questions (research depth, rules, preferences)
-2. Check existing memories: \`supermemory(mode: "list", scope: "project")\`
+2. Check existing memories: \`viking_memory(mode: "list", scope: "project")\`
 3. Research based on chosen depth
 4. Save memories incrementally as you discover insights
 5. Reflect and verify completeness
@@ -196,7 +196,7 @@ function addPluginToConfig(configPath: string): boolean {
   try {
     const content = readFileSync(configPath, "utf-8");
     
-    if (content.includes("opencode-supermemory")) {
+    if (content.includes("opencode-viking-memory")) {
       console.log("✓ Plugin already registered in config");
       return true;
     }
@@ -263,10 +263,10 @@ function createNewConfig(): boolean {
 
 function createCommand(): boolean {
   mkdirSync(OPENCODE_COMMAND_DIR, { recursive: true });
-  const commandPath = join(OPENCODE_COMMAND_DIR, "supermemory-init.md");
+  const commandPath = join(OPENCODE_COMMAND_DIR, "viking_memory-init.md");
 
   writeFileSync(commandPath, SUPERMEMORY_INIT_COMMAND);
-  console.log(`✓ Created /supermemory-init command`);
+  console.log(`✓ Created /viking_memory-init command`);
   return true;
 }
 
@@ -325,7 +325,7 @@ interface InstallOptions {
 }
 
 async function install(options: InstallOptions): Promise<number> {
-  console.log("\n🧠 opencode-supermemory installer\n");
+  console.log("\n🧠 opencode-viking-memory installer\n");
 
   const rl = options.tui ? createReadline() : null;
 
@@ -357,10 +357,10 @@ async function install(options: InstallOptions): Promise<number> {
     }
   }
 
-  // Step 2: Create /supermemory-init command
-  console.log("\nStep 2: Create /supermemory-init command");
+  // Step 2: Create /viking-memory-init command
+  console.log("\nStep 2: Create /viking_memory-init command");
   if (options.tui) {
-    const shouldCreate = await confirm(rl!, "Add /supermemory-init command?");
+    const shouldCreate = await confirm(rl!, "Add /viking_memory-init command?");
     if (!shouldCreate) {
       console.log("Skipped.");
     } else {
@@ -374,13 +374,13 @@ async function install(options: InstallOptions): Promise<number> {
   if (isOhMyOpencodeInstalled()) {
     console.log("\nStep 3: Configure Oh My OpenCode");
     console.log("Detected Oh My OpenCode plugin.");
-    console.log("Supermemory handles context compaction, so the built-in context-window-limit-recovery hook should be disabled.");
+    console.log("VikingMemory handles context compaction, so the built-in context-window-limit-recovery hook should be disabled.");
     
     if (isAutoCompactAlreadyDisabled()) {
       console.log("✓ anthropic-context-window-limit-recovery hook already disabled");
     } else {
       if (options.tui) {
-        const shouldDisable = await confirm(rl!, "Disable anthropic-context-window-limit-recovery hook to let Supermemory handle context?");
+        const shouldDisable = await confirm(rl!, "Disable anthropic-context-window-limit-recovery hook to let VikingMemory handle context?");
         if (!shouldDisable) {
           console.log("Skipped.");
         } else {
@@ -397,11 +397,11 @@ async function install(options: InstallOptions): Promise<number> {
   // Step 4: API key instructions
   console.log("\n" + "─".repeat(50));
   console.log("\n🔑 Final step: Set your API key\n");
-  console.log("Get your API key from: https://console.supermemory.ai");
-  console.log("\nThen add to your shell profile:\n");
-  console.log('  export SUPERMEMORY_API_KEY="sm_..."');
-  console.log("\nOr create ~/.config/opencode/supermemory.jsonc:\n");
-  console.log('  { "apiKey": "sm_..." }');
+console.log("Get your API key from: https://console.volcengine.com/knowledgebase/");
+console.log("\nThen add to your shell profile:\n");
+console.log('  export VIKING_MEMORY_API_KEY="..."');
+console.log("\nOr create ~/.config/opencode/viking_memory.jsonc:\n");
+console.log('  { "apiKey": "..." }');
   console.log("\n" + "─".repeat(50));
   console.log("\n✓ Setup complete! Restart OpenCode to activate.\n");
 
@@ -411,7 +411,7 @@ async function install(options: InstallOptions): Promise<number> {
 
 function printHelp(): void {
   console.log(`
-opencode-supermemory - Persistent memory for OpenCode agents
+opencode-viking-memory - Persistent memory for OpenCode agents
 
 Commands:
   install                    Install and configure the plugin
@@ -419,9 +419,9 @@ Commands:
     --disable-context-recovery   Disable Oh My OpenCode's context-window-limit-recovery hook (use with --no-tui)
 
 Examples:
-  bunx opencode-supermemory@latest install
-  bunx opencode-supermemory@latest install --no-tui
-  bunx opencode-supermemory@latest install --no-tui --disable-context-recovery
+  bunx opencode-viking-memory@latest install
+  bunx opencode-viking-memory@latest install --no-tui
+  bunx opencode-viking-memory@latest install --no-tui --disable-context-recovery
 `);
 }
 
