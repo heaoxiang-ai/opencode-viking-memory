@@ -209,27 +209,6 @@ Create `~/.config/opencode/viking_memory.jsonc`:
   
   // Resource ID (can also use VIKING_MEMORY_RESOURCE_ID env var)
   "resourceId": "mem-...",
-  
-  // Min similarity for memory retrieval (0-1)
-  "similarityThreshold": 0.6,
-  
-  // Max memories injected per request
-  "maxMemories": 5,
-  
-  // Max project memories listed
-  "maxProjectMemories": 10,
-  
-  // Max profile facts injected
-  "maxProfileItems": 5,
-  
-  // Include user profile in context
-  "injectProfile": true,
-  
-  // Prefix for container tags
-  "containerTagPrefix": "opencode",
-  
-  // Extra keyword patterns for memory detection (regex)
-  "keywordPatterns": ["log\\s+this", "write\\s+down"]
 }
 ```
 
