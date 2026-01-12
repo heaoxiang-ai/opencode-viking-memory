@@ -41,7 +41,6 @@ export const VikingMemoryPlugin: Plugin = async (ctx: PluginInput) => {
   const tags = getTags(directory);
   const injectedSessions = new Set<string>();
   log("Plugin init", { directory, tags, configured: isConfigured() });
-  log("测试viking memory")
   
   if (!isConfigured()) {
     log("Plugin disabled - VIKING_MEMORY_API_KEY not set");
