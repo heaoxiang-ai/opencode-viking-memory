@@ -266,7 +266,7 @@ function createCommand(): boolean {
   const commandPath = join(OPENCODE_COMMAND_DIR, "viking_memory-init.md");
 
   writeFileSync(commandPath, SUPERMEMORY_INIT_COMMAND);
-  console.log(`✓ Created /viking_memory-init command`);
+  console.log(`✓ Created /viking-memory-init command`);
   return true;
 }
 
@@ -358,9 +358,9 @@ async function install(options: InstallOptions): Promise<number> {
   }
 
   // Step 2: Create /viking-memory-init command
-  console.log("\nStep 2: Create /viking_memory-init command");
+  console.log("\nStep 2: Create /viking-memory-init command");
   if (options.tui) {
-    const shouldCreate = await confirm(rl!, "Add /viking_memory-init command?");
+    const shouldCreate = await confirm(rl!, "Add /viking-memory-init command?");
     if (!shouldCreate) {
       console.log("Skipped.");
     } else {
