@@ -9,7 +9,7 @@ const MESSAGE_STORAGE = join(homedir(), ".opencode", "messages");
 const PART_STORAGE = join(homedir(), ".opencode", "parts");
 
 const DEFAULT_THRESHOLD = CONFIG.compressionThreshold;
-const MIN_TOKENS_FOR_COMPACTION = 50_000;
+const MIN_TOKENS_FOR_COMPACTION = 30_000;
 const COMPACTION_COOLDOWN_MS = 30_000;
 const CLAUDE_DEFAULT_CONTEXT_LIMIT = 128_000;
 const CLAUDE_MODEL_PATTERN = /claude-(opus|sonnet|haiku)/i;
@@ -320,15 +320,27 @@ export function createCompactionHook(
   }
 
   async function checkAndTriggerCompaction(sessionID: string, lastAssistant: MessageInfo): Promise<void> {
-    if (state.compactionInProgress.has(sessionID)) return;
+    if (state.compactionInProgress.has(sessionID)) {
+      log("[compaction] compaction already in progress", { sessionID });
+      return;
+    }
 
     const lastCompaction = state.lastCompactionTime.get(sessionID) ?? 0;
-    if (Date.now() - lastCompaction < COMPACTION_COOLDOWN_MS) return;
+    if (Date.now() - lastCompaction < COMPACTION_COOLDOWN_MS) {
+      log("[compaction] compaction cooldown active", { sessionID, lastCompaction });
+      return;
+    }
 
-    if (lastAssistant.summary === true) return;
+    if (lastAssistant.summary === true) {
+      log("[compaction] message is already a summary", { sessionID });
+      return;
+    }
 
     const tokens = lastAssistant.tokens;
-    if (!tokens) return;
+    if (!tokens) {
+      log("[compaction] no token information available", { sessionID });
+      return;
+    }
 
     let modelID = lastAssistant.modelID ?? "";
     let providerID = lastAssistant.providerID ?? "";
@@ -349,7 +361,10 @@ export function createCompactionHook(
     const contextLimit = configLimit ?? CLAUDE_DEFAULT_CONTEXT_LIMIT;
     const totalUsed = tokens.input + tokens.cache.read + tokens.output;
 
-    if (totalUsed < MIN_TOKENS_FOR_COMPACTION) return;
+    if (totalUsed < MIN_TOKENS_FOR_COMPACTION) {
+      log("[compaction] token usage below minimum threshold", { sessionID, totalUsed, MIN_TOKENS_FOR_COMPACTION });
+      return;
+    }
 
     const usageRatio = totalUsed / contextLimit;
 
@@ -361,12 +376,16 @@ export function createCompactionHook(
       threshold,
     });
 
-    if (usageRatio < threshold) return;
+    if (usageRatio < threshold) {
+      log("[compaction] usage ratio below compaction threshold", { sessionID, usageRatio, threshold });
+      return;
+    }
 
     state.compactionInProgress.add(sessionID);
     state.lastCompactionTime.set(sessionID, Date.now());
 
     if (!providerID || !modelID) {
+      log("[compaction] missing providerID or modelID", { sessionID, providerID, modelID });
       state.compactionInProgress.delete(sessionID);
       return;
     }
