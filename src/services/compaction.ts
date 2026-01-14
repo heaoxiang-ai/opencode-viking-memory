@@ -11,7 +11,7 @@ const PART_STORAGE = join(homedir(), ".opencode", "parts");
 const DEFAULT_THRESHOLD = CONFIG.compressionThreshold;
 const MIN_TOKENS_FOR_COMPACTION = 50_000;
 const COMPACTION_COOLDOWN_MS = 30_000;
-const CLAUDE_DEFAULT_CONTEXT_LIMIT = 200_000;
+const CLAUDE_DEFAULT_CONTEXT_LIMIT = 128_000;
 const CLAUDE_MODEL_PATTERN = /claude-(opus|sonnet|haiku)/i;
 
 interface CompactionState {
