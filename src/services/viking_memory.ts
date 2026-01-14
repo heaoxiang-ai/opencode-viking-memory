@@ -163,7 +163,7 @@ export class VikingMemory {
         "event_type": "sys_event_vibe_coding_v1",
         "time": Date.now(),
         "user_id": containerTag,
-        "update_profiles": {"profile_type": "sys_profile_vibe_coding_v1"},
+        "update_profiles": [{"profile_type": "sys_profile_vibe_coding_v1"}],
       };
       log("addMemory: request", { url: `${this.url}/api/memory/event/add`, method: "POST", body: requestBody });
 
