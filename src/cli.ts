@@ -10,8 +10,8 @@ const OPENCODE_COMMAND_DIR = join(OPENCODE_CONFIG_DIR, "command");
 const OH_MY_OPENCODE_CONFIG = join(OPENCODE_CONFIG_DIR, "oh-my-opencode.json");
 const PLUGIN_NAME = "opencode-viking-memory@latest";
 
-const SUPERMEMORY_INIT_COMMAND = `---
-description: Initialize Supermemory with comprehensive codebase knowledge
+const VIKING_MEMORY_INIT_COMMAND = `---
+description: Initialize VikingMemory with comprehensive codebase knowledge
 ---
 
 # Initializing VikingMemory
@@ -263,9 +263,9 @@ function createNewConfig(): boolean {
 
 function createCommand(): boolean {
   mkdirSync(OPENCODE_COMMAND_DIR, { recursive: true });
-  const commandPath = join(OPENCODE_COMMAND_DIR, "viking_memory-init.md");
+  const commandPath = join(OPENCODE_COMMAND_DIR, "viking-memory-init.md");
 
-  writeFileSync(commandPath, SUPERMEMORY_INIT_COMMAND);
+  writeFileSync(commandPath, VIKING_MEMORY_INIT_COMMAND);
   console.log(`✓ Created /viking-memory-init command`);
   return true;
 }
