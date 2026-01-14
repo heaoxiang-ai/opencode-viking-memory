@@ -246,7 +246,6 @@ export class VikingMemory {
           "X-Viking-Debug": "1",
         },
         body: JSON.stringify({
-          containerTags: [containerTag],
           filter: {user_id: containerTag, memory_type: "sys_event_vibe_coding_v1"},
           limit: 5000, // mock 
           resource_id: this.resource_id
