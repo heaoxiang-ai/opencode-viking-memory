@@ -82,7 +82,7 @@ export const VikingMemoryPlugin: Plugin = async (ctx: PluginInput) => {
         if (detectMemoryKeyword(userMessage)) {
           log("chat.message: memory keyword detected");
           const nudgePart: Part = {
-             id: `viking_memory-nudge-${Date.now()}`,
+             id: `viking-memory-nudge-${Date.now()}`,
             sessionID: input.sessionID,
             messageID: output.message.id,
             type: "text",
@@ -127,7 +127,7 @@ export const VikingMemoryPlugin: Plugin = async (ctx: PluginInput) => {
 
           if (memoryContext) {
             const contextPart: Part = {
-              id: `viking_memory-context-${Date.now()}`,
+              id: `viking-memory-context-${Date.now()}`,
               sessionID: input.sessionID,
               messageID: output.message.id,
               type: "text",
@@ -198,7 +198,7 @@ export const VikingMemoryPlugin: Plugin = async (ctx: PluginInput) => {
               case "help": {
                 return JSON.stringify({
                   success: true,
-                  message: "Supermemory Usage Guide",
+                  message: "VikingMemory Usage Guide",
                   commands: [
                     {
                       command: "add",
