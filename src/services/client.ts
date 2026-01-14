@@ -1,4 +1,4 @@
-import { VikingMemory } from "./vikingMemory.js";
+import { VikingMemory } from "./viking_memory.js";
 import { CONFIG, VIKING_MEMORY_API_KEY, isConfigured, VIKING_MEMORY_RESOURCE_ID} from "../config.js";
 import { log } from "./logger.js";
 import type {

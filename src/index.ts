@@ -18,7 +18,7 @@ const INLINE_CODE_PATTERN = /`[^`]+`/g;
 const MEMORY_KEYWORD_PATTERN = new RegExp(`\\b(${CONFIG.keywordPatterns.join("|")})\\b`, "i");
 
 const MEMORY_NUDGE_MESSAGE = `[MEMORY TRIGGER DETECTED]
-The user wants you to remember something. You MUST use the \`vikingMemory\` tool with \`mode: "add"\` to save this information.
+The user wants you to remember something. You MUST use the \`viking_memory\` tool with \`mode: "add"\` to save this information.
 
 Extract the key information the user wants remembered and save it as a concise, searchable memory.
 - Use \`scope: "project"\` for project-specific preferences (e.g., "run lint with tests")
