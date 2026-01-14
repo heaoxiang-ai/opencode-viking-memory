@@ -8,7 +8,7 @@ import { CONFIG } from "../config.js";
 const MESSAGE_STORAGE = join(homedir(), ".opencode", "messages");
 const PART_STORAGE = join(homedir(), ".opencode", "parts");
 
-const DEFAULT_THRESHOLD = 0.80;
+const DEFAULT_THRESHOLD = 0.10;
 const MIN_TOKENS_FOR_COMPACTION = 50_000;
 const COMPACTION_COOLDOWN_MS = 30_000;
 const CLAUDE_DEFAULT_CONTEXT_LIMIT = 200_000;
@@ -344,10 +344,6 @@ export function createCompactionHook(
     }
     agent = storedMessage?.agent;
 
-    if (!isSupportedModel(modelID)) {
-      log("[compaction] skipping unsupported model", { modelID });
-      return;
-    }
 
     const configLimit = getModelLimit?.(providerID, modelID);
     const contextLimit = configLimit ?? CLAUDE_DEFAULT_CONTEXT_LIMIT;

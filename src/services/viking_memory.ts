@@ -158,58 +158,6 @@ export class VikingMemory {
   }> {
     try {
       const requestBody = {
-        "messages": [{"content": content, "role": "user"}],
-        resource_id: this.resource_id,
-        "metadata": {"default_user_id": containerTag, "default_assistant_id": "opencode", "time": Date.now()}
-        // metadata,
-      };
-      log("addMemory: request", { url: `${this.url}/api/memory/session/add`, method: "POST", body: requestBody });
-
-      const response = await fetch(`${this.url}/api/memory/session/add`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${this.apiKey}`,
-          "X-Viking-Debug": "1",
-        },
-        body: JSON.stringify(requestBody),
-      });
-      if (!response.ok) {
-        const errorText = await response.text();
-        const errorMessage = `HTTP ${response.status}: ${errorText}`;
-        log("addMemory: error", { error: errorMessage });
-        return { success: false, error: errorMessage };
-      }
-
-      const result = await response.json() as Record<string, unknown>;
-      const dataObj = result.data as { session_id: string };
-      log("addMemory: response", { status: response.status, result });
-
-      return { success: true, id: (dataObj.session_id as string) || "" };
-    } catch (error) {
-      const errorMessage = error instanceof Error ? error.message : String(error);
-      log("addMemory: error", { error: errorMessage });
-      return {
-        success: false,
-        error: errorMessage,
-      };
-    }
-  }
-  
-  async addEvent(
-    content: string,
-    containerTag: string,
-    metadata?: { type?: string; tool?: string; [key: string]: unknown }
-  ): Promise<{
-    success: true;
-    id: string;
-    [key: string]: unknown;
-  } | {
-    success: false;
-    error: string;
-  }> {
-    try {
-      const requestBody = {
         "memory_info": {"summary": content},
         "resource_id": this.resource_id,
         "event_type": "sys_event_vibe_coding_v1",
