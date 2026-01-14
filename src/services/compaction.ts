@@ -8,7 +8,7 @@ import { CONFIG } from "../config.js";
 const MESSAGE_STORAGE = join(homedir(), ".opencode", "messages");
 const PART_STORAGE = join(homedir(), ".opencode", "parts");
 
-const DEFAULT_THRESHOLD = 0.10;
+const DEFAULT_THRESHOLD = CONFIG.compressionThreshold;
 const MIN_TOKENS_FOR_COMPACTION = 50_000;
 const COMPACTION_COOLDOWN_MS = 30_000;
 const CLAUDE_DEFAULT_CONTEXT_LIMIT = 200_000;
