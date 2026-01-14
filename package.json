@@ -1,6 +1,6 @@
 {
   "name": "opencode-viking-memory",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "OpenCode plugin that gives coding agents persistent memory using VikingMemory",
   "type": "module",
   "main": "dist/index.js",
