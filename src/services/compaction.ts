@@ -321,24 +321,24 @@ export function createCompactionHook(
 
   async function checkAndTriggerCompaction(sessionID: string, lastAssistant: MessageInfo): Promise<void> {
     if (state.compactionInProgress.has(sessionID)) {
-      log("[compaction] compaction already in progress", { sessionID });
+      if (CONFIG.debug) log("[compaction] compaction already in progress", { sessionID });
       return;
     }
 
     const lastCompaction = state.lastCompactionTime.get(sessionID) ?? 0;
     if (Date.now() - lastCompaction < COMPACTION_COOLDOWN_MS) {
-      log("[compaction] compaction cooldown active", { sessionID, lastCompaction });
+      if (CONFIG.debug) log("[compaction] compaction cooldown active", { sessionID, lastCompaction });
       return;
     }
 
     if (lastAssistant.summary === true) {
-      log("[compaction] message is already a summary", { sessionID });
+      if (CONFIG.debug) log("[compaction] message is already a summary", { sessionID });
       return;
     }
 
     const tokens = lastAssistant.tokens;
     if (!tokens) {
-      log("[compaction] no token information available", { sessionID });
+      if (CONFIG.debug) log("[compaction] no token information available", { sessionID });
       return;
     }
 
@@ -362,7 +362,7 @@ export function createCompactionHook(
     const totalUsed = tokens.input + tokens.cache.read + tokens.output;
 
     if (totalUsed < MIN_TOKENS_FOR_COMPACTION) {
-      log("[compaction] token usage below minimum threshold", { sessionID, totalUsed, MIN_TOKENS_FOR_COMPACTION });
+      if (CONFIG.debug) log("[compaction] token usage below minimum threshold", { sessionID, totalUsed, MIN_TOKENS_FOR_COMPACTION });
       return;
     }
 
@@ -377,18 +377,18 @@ export function createCompactionHook(
     });
 
     if (usageRatio < threshold) {
-      log("[compaction] usage ratio below compaction threshold", { sessionID, usageRatio, threshold });
+      if (CONFIG.debug) log("[compaction] usage ratio below compaction threshold", { sessionID, usageRatio, threshold });
       return;
     }
 
     state.compactionInProgress.add(sessionID);
     state.lastCompactionTime.set(sessionID, Date.now());
 
-    if (!providerID || !modelID) {
-      log("[compaction] missing providerID or modelID", { sessionID, providerID, modelID });
-      state.compactionInProgress.delete(sessionID);
-      return;
-    }
+     if (!providerID || !modelID) {
+       if (CONFIG.debug) log("[compaction] missing providerID or modelID", { sessionID, providerID, modelID });
+       state.compactionInProgress.delete(sessionID);
+       return;
+     }
 
     await ctx.client.tui.showToast({
       body: {

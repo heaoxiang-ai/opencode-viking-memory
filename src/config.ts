@@ -21,6 +21,7 @@ interface VikingMemoryConfig {
   filterPrompt?: string;
   keywordPatterns?: string[];
   compressionThreshold?: number;
+  debug?: boolean;
 }
 
 const DEFAULT_KEYWORD_PATTERNS = [
@@ -52,6 +53,7 @@ const DEFAULTS: Required<Omit<VikingMemoryConfig, "apiKey" | "resourceId">> = {
   filterPrompt: "You are a stateful coding agent. Remember all the information, including but not limited to user's coding preferences, tech stack, behaviours, workflows, and any other relevant details.",
   keywordPatterns: [],
   compressionThreshold: 0.8,
+  debug: false,
 };
 
 function isValidRegex(pattern: string): boolean {
@@ -92,6 +94,7 @@ export const CONFIG = {
   containerTagPrefix: fileConfig.containerTagPrefix ?? DEFAULTS.containerTagPrefix,
   filterPrompt: fileConfig.filterPrompt ?? DEFAULTS.filterPrompt,
   compressionThreshold: fileConfig.compressionThreshold ?? DEFAULTS.compressionThreshold,
+  debug: fileConfig.debug ?? DEFAULTS.debug,
   keywordPatterns: [
     ...DEFAULT_KEYWORD_PATTERNS,
     ...(fileConfig.keywordPatterns ?? []).filter(isValidRegex),
