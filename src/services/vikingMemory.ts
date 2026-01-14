@@ -196,6 +196,60 @@ export class VikingMemory {
     }
   }
   
+  async addEvent(
+    content: string,
+    containerTag: string,
+    metadata?: { type?: string; tool?: string; [key: string]: unknown }
+  ): Promise<{
+    success: true;
+    id: string;
+    [key: string]: unknown;
+  } | {
+    success: false;
+    error: string;
+  }> {
+    try {
+      const requestBody = {
+        "memory_info": {"summary": content},
+        "resource_id": this.resource_id,
+        "event_type": "sys_event_vibe_coding_v1",
+        "time": Date.now(),
+        "user_id": containerTag,
+        "update_profiles": {"profile_type": "sys_profile_vibe_coding_v1"},
+      };
+      log("addMemory: request", { url: `${this.url}/api/memory/event/add`, method: "POST", body: requestBody });
+
+      const response = await fetch(`${this.url}/api/memory/event/add`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${this.apiKey}`,
+          "X-Viking-Debug": "1",
+        },
+        body: JSON.stringify(requestBody),
+      });
+      if (!response.ok) {
+        const errorText = await response.text();
+        const errorMessage = `HTTP ${response.status}: ${errorText}`;
+        log("addMemory: error", { error: errorMessage });
+        return { success: false, error: errorMessage };
+      }
+
+      const result = await response.json() as Record<string, unknown>;
+      const dataObj = result.data as { event_id: string };
+      log("addMemory: response", { status: response.status, result });
+
+      return { success: true, id: (dataObj.event_id as string) || "" };
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log("addMemory: error", { error: errorMessage });
+      return {
+        success: false,
+        error: errorMessage,
+      };
+    }
+  }
+  
   async deleteMemory(memoryId: string): Promise<{ success: true } | { success: false; error: string }> {
     try {
       const response = await fetch(`${this.url}/api/memory/event/delete`, {
