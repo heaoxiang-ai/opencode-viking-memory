@@ -51,6 +51,7 @@ export class VikingMemoryClient {
         ),
         TIMEOUT_MS
           );
+      log("searchMemories: result", { success: result.success, total: result.total });
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -64,6 +65,7 @@ export class VikingMemoryClient {
         this.getClient().getProfile(containerTag, query, options),
         TIMEOUT_MS
       );
+      log("getProfile: result", { success: result.success });
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -85,6 +87,7 @@ export class VikingMemoryClient {
         ),
         TIMEOUT_MS
       );
+      log("addMemory: result", { success: result.success, id: result.success ? (result as any).id : undefined });
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -98,6 +101,7 @@ export class VikingMemoryClient {
         this.getClient().deleteMemory(memoryId),
         TIMEOUT_MS
       );
+      log("deleteMemory: result", { success: true });
       return { success: true };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -115,6 +119,7 @@ export class VikingMemoryClient {
         ),
         TIMEOUT_MS
       );
+      log("listMemories: result", { success: result.success, total: result.pagination.totalItems });
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -152,6 +157,7 @@ export class VikingMemoryClient {
       }
 
       const result = await response.json() as ConversationIngestResponse;
+      log("ingestConversation: result", { success: true, id: result.id });
       return { success: true as const, ...result };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
@@ -186,6 +192,7 @@ export class VikingMemoryClient {
           similarity: 1.0
         };
       });
+      log("searchExperienceCards: result", { success: true, total: results.length });
       return { success: true as const, results, total: results.length, timing: 0 };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
