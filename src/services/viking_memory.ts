@@ -14,7 +14,7 @@ export class VikingMemory {
   async searchMemories(
     query: string,
     containerTag: string, // user_id
-    options?: { threshold?: number; limit?: number; searchMode?: string }
+    options?: { threshold?: number; limit?: number; searchMode?: string; memoryType?: string }
   ): Promise<{
     success: true;
     error?: undefined;
@@ -29,6 +29,7 @@ export class VikingMemory {
     timing: 0;
   }> {
     try {
+      const memoryType = options?.memoryType || "sys_event_vibe_coding_v1";
       const response = await fetch(`${this.url}/api/memory/event/search`, {
         method: "POST",
         headers: {
@@ -38,7 +39,7 @@ export class VikingMemory {
         },
         body: JSON.stringify({
           query: query,
-          filter: {user_id: containerTag, memory_type: "sys_event_vibe_coding_v1"},
+          filter: {user_id: containerTag, memory_type: memoryType},
           limit: options?.limit,
           resource_id: this.resource_id
         }),
