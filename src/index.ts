@@ -36,6 +36,25 @@ function detectMemoryKeyword(text: string): boolean {
   return MEMORY_KEYWORD_PATTERN.test(textWithoutCode);
 }
 
+function formatExperienceCardsForPrompt(results: Array<{ id: string; memory?: string; chunk?: string; similarity: number }>): string {
+  if (results.length === 0) return "";
+
+  const cards = results.map(r => {
+    const content = r.memory || r.chunk || "";
+    try {
+      const parsed = JSON.parse(content);
+      return `- ${parsed.summary || content}`;
+    } catch {
+      return `- ${content}`;
+    }
+  }).join("\n");
+
+  return `[EXPERIENCE CARDS]
+The following relevant experience cards were found:
+${cards}
+`;
+}
+
 export const VikingMemoryPlugin: Plugin = async (ctx: PluginInput) => {
   const { directory } = ctx;
   const tags = getTags(directory);
@@ -90,6 +109,23 @@ export const VikingMemoryPlugin: Plugin = async (ctx: PluginInput) => {
             synthetic: true,
           };
           output.parts.push(nudgePart);
+        }
+
+        const experienceCardsResult = await vikingMemoryClient.searchExperienceCards(userMessage);
+        if (experienceCardsResult.success && experienceCardsResult.results.length > 0) {
+          log("chat.message: experience cards found", { count: experienceCardsResult.results.length });
+          const experienceCardsContext = formatExperienceCardsForPrompt(experienceCardsResult.results);
+          if (experienceCardsContext) {
+            const experienceCardsPart: Part = {
+              id: `viking-memory-experience-cards-${Date.now()}`,
+              sessionID: input.sessionID,
+              messageID: output.message.id,
+              type: "text",
+              text: experienceCardsContext,
+              synthetic: true,
+            };
+            output.parts.unshift(experienceCardsPart);
+          }
         }
 
         const isFirstMessage = !injectedSessions.has(input.sessionID);
@@ -168,6 +204,7 @@ export const VikingMemoryPlugin: Plugin = async (ctx: PluginInput) => {
               "preference",
               "learned-pattern",
               "conversation",
+              "experience-card",
             ])
             .optional(),
           scope: tool.schema.enum(["user", "project"]).optional(),
