@@ -105,6 +105,7 @@ export class VikingMemory {
     error: string;
     profile: null;
   }> {
+    log("getProfile: start", { containerTag, query, options });
     try {
       const filter: Record<string, string> = {
         "memory_type": options?.memoryType || "sys_profile_vibe_coding_v1"
@@ -147,14 +148,23 @@ export class VikingMemory {
       }
       const finalProfile = {
         static: [],
-        dynamic: dynamicList // TODO 暂时先放到 dynamic 里面，不知道 static 和 dynamic 有什么区别
+        dynamic: dynamicList
       };
+
+      log("getProfile: api response", { 
+        fullResult: result,
+        profile: finalProfile,
+        dynamicCount: finalProfile.dynamic.length,
+        staticCount: finalProfile.static.length
+      });
 
       return { success: true, profile: finalProfile };
     } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log("getProfile: error", { error: errorMessage });
       return {
         success: false,
-        error: error instanceof Error ? error.message : String(error),
+        error: errorMessage,
         profile: null,
       };
     }
