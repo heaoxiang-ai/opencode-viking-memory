@@ -185,13 +185,13 @@ export class VikingMemoryClient {
     }
   }
 
-  async searchExperienceCards(query: string, containerTag: string) {
-    log("searchExperienceCards: start", { containerTag, queryLength: query.length });
+  async searchExperienceCards(query: string) {
+    log("searchExperienceCards: start", { queryLength: query.length });
     try {
       const result = await withTimeout(
         this.getClient().searchMemories(
           query,
-          containerTag,
+          undefined,
           {
             threshold: CONFIG.similarityThreshold,
             limit: CONFIG.maxMemories,
