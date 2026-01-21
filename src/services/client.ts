@@ -38,7 +38,6 @@ export class VikingMemoryClient {
   }
 
   async searchMemories(query: string, containerTag?: string) {
-    log("searchMemories: start", { containerTag });
     try {
       const result = await withTimeout(
         this.getClient().searchMemories(
@@ -51,30 +50,23 @@ export class VikingMemoryClient {
           }
         ),
         TIMEOUT_MS
-      );
-      log("searchMemories: result", { result });
-      log("searchMemories: success", { count: (result as any).results?.length || 0 });
+          );
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      log("searchMemories: error", { error: errorMessage });
       return { success: false as const, error: errorMessage, results: [], total: 0, timing: 0 };
     }
   }
 
-  async getProfile(containerTag: string, query?: string) {
-    log("getProfile: start", { containerTag });
+  async getProfile(containerTag?: string, query?: string, options?: { assistantId?: string; memoryType?: string }) {
     try {
       const result = await withTimeout(
-        this.getClient().getProfile(containerTag, query),
+        this.getClient().getProfile(containerTag, query, options),
         TIMEOUT_MS
       );
-      log("getProfile: result", { result });
-      log("getProfile: success", { hasProfile: !!(result as any).profile });
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      log("getProfile: error", { error: errorMessage });
       return { success: false as const, error: errorMessage, profile: null };
     }
   }
@@ -84,7 +76,6 @@ export class VikingMemoryClient {
     containerTag: string,
     metadata?: { type?: MemoryType; tool?: string; [key: string]: unknown }
   ) {
-    log("addMemory: start", { containerTag, contentLength: content.length });
     try {
       const result = await withTimeout(
         this.getClient().addMemory(
@@ -94,38 +85,27 @@ export class VikingMemoryClient {
         ),
         TIMEOUT_MS
       );
-      log("addMemory: result", { result });
-      if (!result.success) {
-        log("addMemory: error", { error: result.error });
-        return result;
-      }
-      log("addMemory: success", { id: (result as any).id });
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      log("addMemory: error", { error: errorMessage });
       return { success: false as const, error: errorMessage };
     }
   }
 
   async deleteMemory(memoryId: string) {
-    log("deleteMemory: start", { memoryId });
     try {
       await withTimeout(
         this.getClient().deleteMemory(memoryId),
         TIMEOUT_MS
       );
-      log("deleteMemory: success", { memoryId });
       return { success: true };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      log("deleteMemory: error", { memoryId, error: errorMessage });
       return { success: false, error: errorMessage };
     }
   }
 
   async listMemories(containerTag: string, limit = 20) {
-    log("listMemories: start", { containerTag, limit });
     try {
       const result = await withTimeout(
         this.getClient().listMemories(
@@ -135,11 +115,9 @@ export class VikingMemoryClient {
         ),
         TIMEOUT_MS
       );
-      log("listMemories: success", { count: (result as any).memories?.length || 0 });
       return result;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      log("listMemories: error", { error: errorMessage });
       return { success: false as const, error: errorMessage, memories: [], pagination: { currentPage: 1, totalItems: 0, totalPages: 0 } };
     }
   }
@@ -150,7 +128,6 @@ export class VikingMemoryClient {
     containerTags: string[],
     metadata?: Record<string, string | number | boolean>
   ) {
-    log("ingestConversation: start", { conversationId, messageCount: messages.length });
     try {
       const response = await withTimeout(
         fetch(`${Viking_Memory_API_URL}/conversations`, {
@@ -171,40 +148,47 @@ export class VikingMemoryClient {
 
       if (!response.ok) {
         const errorText = await response.text();
-        log("ingestConversation: error response", { status: response.status, error: errorText });
         return { success: false as const, error: `HTTP ${response.status}: ${errorText}` };
       }
 
       const result = await response.json() as ConversationIngestResponse;
-      log("ingestConversation: success", { conversationId, status: result.status });
       return { success: true as const, ...result };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      log("ingestConversation: error", { error: errorMessage });
       return { success: false as const, error: errorMessage };
     }
   }
 
   async searchExperienceCards(query: string) {
-    log("searchExperienceCards: start", { queryLength: query.length });
     try {
       const result = await withTimeout(
-        this.getClient().searchMemories(
-          query,
+        this.getClient().getProfile(
           undefined,
+          query,
           {
-            threshold: CONFIG.similarityThreshold,
-            limit: CONFIG.maxMemories,
-            memoryType: "experience-card"
+            assistantId: "assistant",
+            memoryType: "experience_card",
+            limit: 3
           }
         ),
         TIMEOUT_MS
       );
-      log("searchExperienceCards: result", { count: (result as any).results?.length || 0 });
-      return result;
+      if (!result.success) {
+        return { success: false as const, error: result.error, results: [], total: 0, timing: 0 };
+      }
+      const profile = (result as any).profile;
+      const results = (profile?.dynamic || []).map((item: any, index: number) => {
+        const content = typeof item === 'string' ? item : JSON.stringify(item);
+        return {
+          id: `experience_card_${index}`,
+          memory: content,
+          chunk: content,
+          similarity: 1.0
+        };
+      });
+      return { success: true as const, results, total: results.length, timing: 0 };
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      log("searchExperienceCards: error", { error: errorMessage });
       return { success: false as const, error: errorMessage, results: [], total: 0, timing: 0 };
     }
   }

@@ -115,6 +115,7 @@ export const VikingMemoryPlugin: Plugin = async (ctx: PluginInput) => {
         if (experienceCardsResult.success && experienceCardsResult.results.length > 0) {
           log("chat.message: experience cards found", { count: experienceCardsResult.results.length });
           const experienceCardsContext = formatExperienceCardsForPrompt(experienceCardsResult.results);
+          log("chat.message: experience cards context", { context: experienceCardsContext });
           if (experienceCardsContext) {
             const experienceCardsPart: Part = {
               id: `viking-memory-experience-cards-${Date.now()}`,
