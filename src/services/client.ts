@@ -37,7 +37,7 @@ export class VikingMemoryClient {
     return this.client;
   }
 
-  async searchMemories(query: string, containerTag: string) {
+  async searchMemories(query: string, containerTag?: string) {
     log("searchMemories: start", { containerTag });
     try {
       const result = await withTimeout(
