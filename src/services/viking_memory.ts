@@ -94,8 +94,9 @@ export class VikingMemory {
   }
 
   async getProfile(
-    containerTag: string,
-    query?: string
+    containerTag?: string,
+    query?: string,
+    options?: { assistantId?: string; memoryType?: string }
   ): Promise<{
     success: true;
     profile: { static: string[]; dynamic: string[] };
@@ -105,6 +106,15 @@ export class VikingMemory {
     profile: null;
   }> {
     try {
+      const filter: Record<string, string> = {
+        "memory_type": options?.memoryType || "sys_profile_vibe_coding_v1"
+      };
+      if (containerTag) {
+        filter["user_id"] = containerTag;
+      }
+      if (options?.assistantId) {
+        filter["assistant_id"] = options.assistantId;
+      }
       const response = await fetch(`${this.url}/api/memory/profile/search`, {
         method: "POST",
         headers: {
@@ -113,7 +123,7 @@ export class VikingMemory {
           "X-Viking-Debug": "1",
         },
         body: JSON.stringify({
-          "filter": {"user_id": containerTag, "memory_type": "sys_profile_vibe_coding_v1"},
+          "filter": filter,
           "query": query,
           "resource_id": this.resource_id,
         }),
