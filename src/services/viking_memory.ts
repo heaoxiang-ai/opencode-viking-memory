@@ -1,11 +1,12 @@
 import { log } from "./logger.js";
+import { CONFIG } from "../config.js";
 
 export class VikingMemory {
   private apiKey: string;
   private url: string;
   private resource_id: string;
 
-  constructor(options: { apiKey: string; url: string; resource_id: string}) {
+  constructor(options: { apiKey: string; url: string; resource_id: string }) {
     this.apiKey = options.apiKey;
     this.url = options.url;
     this.resource_id = options.resource_id;
@@ -69,7 +70,9 @@ export class VikingMemory {
       }
 
       const result = await response.json() as NewApiResponse;
-      log("searchMemories: response", { result: result });
+      if (CONFIG.debug) {
+        log("searchMemories: response", { result: result });
+      }
       const mappedResults = (result.data?.result_list || []).map((item) => {
         const content = JSON.stringify(item.memory_info || {});
         return {
@@ -96,7 +99,7 @@ export class VikingMemory {
   async getProfile(
     containerTag?: string,
     query?: string,
-    options?: { assistantId?: string; memoryType?: string }
+    options?: { assistantId?: string; memoryType?: string; limit?: number }
   ): Promise<{
     success: true;
     profile: { static: string[]; dynamic: string[] };
@@ -105,7 +108,9 @@ export class VikingMemory {
     error: string;
     profile: null;
   }> {
-    log("getProfile: start", { containerTag, query, options });
+    if (CONFIG.debug) {
+      log("getProfile: start", { containerTag, query, options });
+    }
     try {
       const filter: Record<string, string> = {
         "memory_type": options?.memoryType || "sys_profile_vibe_coding_v1"
@@ -126,6 +131,7 @@ export class VikingMemory {
         body: JSON.stringify({
           "filter": filter,
           "query": query,
+          "limit": options?.limit ?? 10,
           "resource_id": this.resource_id,
         }),
       });
@@ -151,12 +157,14 @@ export class VikingMemory {
         dynamic: dynamicList
       };
 
-      log("getProfile: api response", { 
-        fullResult: result,
-        profile: finalProfile,
-        dynamicCount: finalProfile.dynamic.length,
-        staticCount: finalProfile.static.length
-      });
+      if (CONFIG.debug) {
+        log("getProfile: api response", { 
+          fullResult: result,
+          profile: finalProfile,
+          dynamicCount: finalProfile.dynamic.length,
+          staticCount: finalProfile.static.length
+        });
+      }
 
       return { success: true, profile: finalProfile };
     } catch (error) {
@@ -191,7 +199,9 @@ export class VikingMemory {
         "user_id": containerTag,
         "update_profiles": [{"profile_type": "sys_profile_vibe_coding_v1"}],
       };
-      log("addMemory: request", { url: `${this.url}/api/memory/event/add`, method: "POST", body: requestBody });
+      if (CONFIG.debug) {
+        log("addMemory: request", { url: `${this.url}/api/memory/event/add`, method: "POST", body: requestBody });
+      }
 
       const response = await fetch(`${this.url}/api/memory/event/add`, {
         method: "POST",
@@ -211,7 +221,9 @@ export class VikingMemory {
 
       const result = await response.json() as Record<string, unknown>;
       const dataObj = result.data as { event_id: string };
-      log("addMemory: response", { status: response.status, result });
+      if (CONFIG.debug) {
+        log("addMemory: response", { status: response.status, result });
+      }
 
       return { success: true, id: (dataObj.event_id as string) || "" };
     } catch (error) {
@@ -297,7 +309,9 @@ export class VikingMemory {
       }
 
       const result = await response.json() as NewApiResponse;
-      log("listMemories: response", { result: result });
+      if (CONFIG.debug) {
+        log("listMemories: response", { result: result });
+      }
       const mappedResults = (result.data?.result_list || []).map((item) => {
         const content = JSON.stringify(item.memory_info || {});
         const createdAt = item.time ? (typeof item.time === "number" ? new Date(item.time).toISOString() : String(item.time)) : "";
