@@ -184,6 +184,30 @@ export class VikingMemoryClient {
       return { success: false as const, error: errorMessage };
     }
   }
+
+  async searchExperienceCards(query: string, containerTag: string) {
+    log("searchExperienceCards: start", { containerTag, queryLength: query.length });
+    try {
+      const result = await withTimeout(
+        this.getClient().searchMemories(
+          query,
+          containerTag,
+          {
+            threshold: CONFIG.similarityThreshold,
+            limit: CONFIG.maxMemories,
+            memoryType: "experience-card"
+          }
+        ),
+        TIMEOUT_MS
+      );
+      log("searchExperienceCards: result", { count: (result as any).results?.length || 0 });
+      return result;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      log("searchExperienceCards: error", { error: errorMessage });
+      return { success: false as const, error: errorMessage, results: [], total: 0, timing: 0 };
+    }
+  }
 }
 
 export const vikingMemoryClient = new VikingMemoryClient();
