@@ -6,7 +6,8 @@ export type MemoryType =
   | "error-solution"
   | "preference"
   | "learned-pattern"
-  | "conversation";
+  | "conversation"
+  | "experience-card";
 
 export type ConversationRole = "user" | "assistant" | "system" | "tool";
 
